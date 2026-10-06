@@ -102,9 +102,11 @@ export const SettingPage: React.FC<SettingPageProps> = ({
             onChange={(e) => onUpdateSettings({ currentSemester: e.target.value })}
             className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-[#BA3808]"
           >
-            <option value="Semester Ganjil 2024/2025">Semester Ganjil 2024/2025 (Aktif)</option>
-            <option value="Semester Genap 2023/2024">Semester Genap 2023/2024</option>
-            <option value="Semester Ganjil 2023/2024">Semester Ganjil 2023/2024</option>
+            <option value="Semester Ganjil 2024/2025">Semester 3 (Ganjil 2024/2025) - Aktif</option>
+            <option value="Semester Genap 2023/2024">Semester 2 (Genap 2023/2024)</option>
+            <option value="Semester Ganjil 2023/2024">Semester 1 (Ganjil 2023/2024)</option>
+            <option value="Semester Genap 2024/2025">Semester 4 (Genap 2024/2025)</option>
+            <option value="Semester Ganjil 2025/2026">Semester 5 (Ganjil 2025/2026)</option>
           </select>
         </div>
       </div>

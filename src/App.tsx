@@ -23,10 +23,37 @@ import { TaskFormModal } from './components/TaskFormModal';
 import { TambahMateriModal } from './components/TambahMateriModal';
 import { IsiPresensiModal } from './components/IsiPresensiModal';
 import { ProfileAvatarModal } from './components/ProfileAvatarModal';
+import { EditProfileModal } from './components/EditProfileModal';
+
+function getPageFromUrl(): PageType {
+  if (typeof window === 'undefined') return 'home';
+  const path = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (path === 'absen') return 'absen';
+  if (path === 'tugas') return 'tugas';
+  if (path === 'matakuliah' || path === 'mata-kuliah') return 'matakuliah';
+  if (path === 'setting' || path === 'pengaturan') return 'setting';
+  return 'home';
+}
 
 export default function App() {
-  // Navigation State (EXACTLY 5 PAGES: Home, Absen, Tugas, Mata Kuliah, Setting)
-  const [currentPage, setCurrentPage] = useState<PageType>('home');
+  // Navigation State with persistent sub-URL routing (Home, Absen, Tugas, Mata Kuliah, Setting)
+  const [currentPage, setCurrentPage] = useState<PageType>(() => getPageFromUrl());
+
+  const navigateTo = (page: PageType) => {
+    setCurrentPage(page);
+    const targetPath = page === 'home' ? '/' : `/${page}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.pushState({ page }, '', targetPath);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPage(getPageFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Database / Storage State
   const [courses, setCourses] = useState<Course[]>(() => StorageService.getCourses());
@@ -46,6 +73,7 @@ export default function App() {
   const [activeCourseIdForPresensi, setActiveCourseIdForPresensi] = useState<string | undefined>(undefined);
   const [selectedCourseForDetail, setSelectedCourseForDetail] = useState<Course | null>(null);
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   // Toast feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -255,12 +283,28 @@ export default function App() {
     showToast('Minggu baru dimulai dengan status Belum Diisi');
   };
 
-  // 6. User Profile Avatar Handler
+  // 6. User Profile Avatar & Data Handlers
   const handleSaveAvatar = (newAvatarUrl: string) => {
     const updated = { ...userProfile, avatarUrl: newAvatarUrl };
     setUserProfile(updated);
     StorageService.saveProfile(updated);
     showToast('Foto profil berhasil diubah');
+  };
+
+  const handleSaveStudentProfile = (updatedData: {
+    nama: string;
+    semester: number;
+    prodi: string;
+    bebanSks: number;
+    ipk: number;
+  }) => {
+    const updated = {
+      ...userProfile,
+      ...updatedData,
+    };
+    setUserProfile(updated);
+    StorageService.saveProfile(updated);
+    showToast('Data semester & profil berhasil diperbarui');
   };
 
   // 7. Settings Update Handler
@@ -278,7 +322,7 @@ export default function App() {
         {/* Fixed Header */}
         <Header
           currentPage={currentPage}
-          onOpenSettings={() => setCurrentPage('setting')}
+          onOpenSettings={() => navigateTo('setting')}
           avatarUrl={userProfile.avatarUrl}
           onOpenAvatarModal={() => setIsAvatarModalOpen(true)}
         />
@@ -291,8 +335,9 @@ export default function App() {
               courses={courses}
               tasks={tasks}
               userProfile={userProfile}
-              onNavigateToTugas={() => setCurrentPage('tugas')}
-              onNavigateToAbsen={() => setCurrentPage('absen')}
+              onNavigateToTugas={() => navigateTo('tugas')}
+              onNavigateToAbsen={() => navigateTo('absen')}
+              onOpenEditProfile={() => setIsEditProfileOpen(true)}
             />
           )}
 
@@ -356,7 +401,7 @@ export default function App() {
         {/* Fixed Bottom Navbar (Home | Absen | + | Tugas | Mata Kuliah) */}
         <BottomNavbar
           currentPage={currentPage}
-          onNavigate={(page) => setCurrentPage(page)}
+          onNavigate={(page) => navigateTo(page)}
           onOpenPlusMenu={() => setIsPlusMenuOpen(true)}
         />
 
@@ -439,6 +484,14 @@ export default function App() {
           onClose={() => setIsAvatarModalOpen(false)}
           currentAvatar={userProfile.avatarUrl}
           onSaveAvatar={handleSaveAvatar}
+        />
+
+        {/* Edit Student Profile & Semester Modal */}
+        <EditProfileModal
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+          userProfile={userProfile}
+          onSave={handleSaveStudentProfile}
         />
 
         {/* Toast Notification */}

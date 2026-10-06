@@ -489,7 +489,13 @@ export const StorageService = {
   getProfile() {
     try {
       const data = localStorage.getItem(PROFILE_KEY);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        return {
+          ...initialStudent,
+          ...parsed,
+        };
+      }
     } catch (e) {
       console.error(e);
     }

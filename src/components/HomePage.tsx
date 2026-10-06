@@ -11,6 +11,7 @@ import {
   CalendarDays,
   FileCheck,
   User,
+  Pencil,
 } from 'lucide-react';
 
 interface HomePageProps {
@@ -27,6 +28,7 @@ interface HomePageProps {
   };
   onNavigateToTugas: () => void;
   onNavigateToAbsen: () => void;
+  onOpenEditProfile?: () => void;
 }
 
 export const HomePage: React.FC<HomePageProps> = ({
@@ -35,6 +37,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   userProfile,
   onNavigateToTugas,
   onNavigateToAbsen,
+  onOpenEditProfile,
 }) => {
   // 1. Dynamic Attendance Calculation from real course database
   let totalAttended = 0;
@@ -65,6 +68,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   // Calculate total SKS from active semester courses
   const totalSemesterSks = courses.reduce((sum, c) => sum + (c.sks || 0), 0);
+  const displaySks = totalSemesterSks > 0 ? totalSemesterSks : (userProfile.bebanSks || 24);
 
   return (
     <div className="space-y-4 pb-4">
@@ -75,9 +79,21 @@ export const HomePage: React.FC<HomePageProps> = ({
             <Calendar className="w-3.5 h-3.5 stroke-[2]" />
             <span>{userProfile.tanggal}</span>
           </div>
-          <span className="bg-white text-[#BA3808] text-[11px] font-bold px-2.5 py-0.5 rounded-md shadow-2xs">
-            {userProfile.status}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="bg-white text-[#BA3808] text-[11px] font-bold px-2.5 py-0.5 rounded-md shadow-2xs">
+              {userProfile.status}
+            </span>
+            {onOpenEditProfile && (
+              <button
+                onClick={onOpenEditProfile}
+                title="Ubah Semester & Data Mahasiswa"
+                className="p-1 rounded-md bg-white/20 hover:bg-white/30 text-white transition-colors flex items-center gap-1 text-[11px]"
+              >
+                <Pencil className="w-3 h-3" />
+                <span className="text-[10px]">Ubah</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <div>
@@ -90,18 +106,24 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         {/* 3-Column Stats Grid */}
-        <div className="bg-black/20 rounded-xl p-3 grid grid-cols-3 text-center divide-x divide-white/15">
+        <div
+          onClick={onOpenEditProfile}
+          className={`bg-black/20 rounded-xl p-3 grid grid-cols-3 text-center divide-x divide-white/15 ${
+            onOpenEditProfile ? 'cursor-pointer hover:bg-black/25 transition-colors' : ''
+          }`}
+          title="Klik untuk mengubah semester, SKS, atau IPK"
+        >
           <div className="px-1">
             <span className="block text-[10px] text-white/75 font-medium">Semester</span>
             <span className="font-bold text-base text-white">{userProfile.semester}</span>
           </div>
           <div className="px-1">
             <span className="block text-[10px] text-white/75 font-medium">Beban SKS</span>
-            <span className="font-bold text-base text-white">{totalSemesterSks} SKS</span>
+            <span className="font-bold text-base text-white">{displaySks} SKS</span>
           </div>
           <div className="px-1">
             <span className="block text-[10px] text-white/75 font-medium">IPK</span>
-            <span className="font-bold text-base text-white">{userProfile.ipk.toFixed(2)}</span>
+            <span className="font-bold text-base text-white">{Number(userProfile.ipk || 3.61).toFixed(2)}</span>
           </div>
         </div>
       </div>

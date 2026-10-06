@@ -1,12 +1,12 @@
 import { Course, Task, AppSettings } from '../types';
 
 export const initialStudent = {
-  nama: 'Mahasiswa',
-  nim: '220401001',
+  nama: 'Sarah Az-Zahra',
+  nim: '220401089',
   prodi: 'Teknik Informatika',
-  semester: 5,
-  bebanSks: 0,
-  ipk: 0.0,
+  semester: 3,
+  bebanSks: 24,
+  ipk: 3.61,
   tanggal: '24 Okt 2024',
   status: 'Aktif',
   sesiHadir: 0,
